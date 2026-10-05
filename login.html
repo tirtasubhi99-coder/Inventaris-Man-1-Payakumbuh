@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistem Inventaris MAN 1 Payakumbuh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(160deg, #ecfdf5 0%, #f8fafc 55%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 900px;
+            min-height: 520px;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        .login-panel {
+            background: linear-gradient(160deg, #059669 0%, #047857 100%);
+            width: 44%;
+            padding: 48px 36px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* pola lingkaran dekoratif lembut, murni CSS, tanpa gambar eksternal */
+        .login-panel::before, .login-panel::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+        .login-panel::before { width: 220px; height: 220px; top: -60px; right: -60px; }
+        .login-panel::after  { width: 160px; height: 160px; bottom: -40px; left: -40px; }
+
+        .lambang {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(4px);
+        }
+
+        .login-panel h2 {
+            font-weight: 800;
+            font-size: 26px;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .login-panel p.subjudul {
+            color: rgba(255,255,255,0.85);
+            font-size: 14.5px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+        .login-panel .footer-panel {
+            font-size: 12.5px;
+            color: rgba(255,255,255,0.65);
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-form-container {
+            width: 56%;
+            padding: 56px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+        }
+        .login-form-container h3 {
+            font-weight: 800;
+            color: var(--abu-900, #1e293b);
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .input-group-custom {
+            position: relative;
+        }
+        .input-group-custom .form-control {
+            padding-left: 44px !important;
+        }
+        .input-group-custom .ikon-input {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--abu-400, #94a3b8);
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .badge-role {
+            display: inline-block;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--hijau-700, #047857);
+            background: var(--hijau-50, #ecfdf5);
+            padding: 4px 10px;
+            border-radius: 8px;
+            margin-top: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .login-card { flex-direction: column; min-height: auto; }
+            .login-panel, .login-form-container { width: 100%; }
+            .login-panel { padding: 32px 28px; }
+            .login-form-container { padding: 36px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card login-card">
+        <!-- PANEL KIRI -->
+        <div class="login-panel">
+            <div>
+                <div class="lambang">🌿</div>
+                <h2>Sistem Inventaris</h2>
+                <p class="subjudul">Tata Usaha<br>MAN 1 Payakumbuh</p>
+            </div>
+            <div class="footer-panel">
+                Kelola barang masuk, keluar, dan stok<br>dengan mudah &amp; rapi.
+            </div>
+        </div>
+
+        <!-- PANEL KANAN: FORM -->
+        <div class="login-form-container">
+            <h3>Selamat Datang 👋</h3>
+            <p class="text-muted mb-4" style="font-size: 14px;">Silakan masuk ke akun Anda untuk melanjutkan</p>
+
+            <div id="pesanError" class="alert alert-danger d-none py-2 px-3 mb-3" style="font-size: 13px; border-radius: 10px;" role="alert">
+                Username atau Password salah!
+            </div>
+
+            <form id="formLogin" onsubmit="validasiLogin(event)">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <div class="input-group-custom">
+                        <span class="ikon-input">👤</span>
+                        <input type="text" id="inputUsername" class="form-control" placeholder="Masukkan username" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="input-group-custom">
+                        <span class="ikon-input">🔒</span>
+                        <input type="password" id="inputPassword" class="form-control" placeholder="Masukkan password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Masuk Aplikasi</button>
+            </form>
+
+            <div class="text-center">
+                <span class="badge-role">🔐 Akses Admin &amp; Staf Tata Usaha</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logika JavaScript untuk Keamanan (tidak diubah dari versi sebelumnya) -->
+    <script>
+        function validasiLogin(event) {
+            event.preventDefault();
+
+            const user = document.getElementById("inputUsername").value;
+            const pass = document.getElementById("inputPassword").value;
+            const pesanError = document.getElementById("pesanError");
+
+            if (user === "admin" && pass === "admin123") {
+                sessionStorage.setItem("statusLogin", "berhasil");
+                sessionStorage.setItem("role", "admin");
+                window.location.href = "dashboard.html";
+            }
+            else if (user === "staf" && pass === "staf123") {
+                sessionStorage.setItem("statusLogin", "berhasil");
+                sessionStorage.setItem("role", "staf");
+                window.location.href = "index.html";
+            }
+            else {
+                pesanError.classList.remove("d-none");
+            }
+        }
+    </script>
+</body>
+</html>

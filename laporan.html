@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Laporan - MAN 1 Payakumbuh</title>
+    <!-- Framework CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Mengatur font agar terlihat formal seperti dokumen resmi */
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            background-color: #f4f6f9; 
+        }
+        
+        /* Desain area kertas A4 */
+        .kertas-a4 {
+            background: white;
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 2cm;
+            margin: 30px auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        /* Desain Kop Surat */
+        .kop-surat { 
+            border-bottom: 3px solid black; 
+            padding-bottom: 15px; 
+            margin-bottom: 25px; 
+            text-align: center; 
+        }
+        .kop-surat h4, .kop-surat h5 { 
+            margin: 0; 
+            font-weight: bold; 
+            text-transform: uppercase;
+        }
+        
+        .tanda-tangan { 
+            margin-top: 60px; 
+            text-align: right; 
+        }
+
+        /* KODE SAKTI: Menyembunyikan tombol dan latar abu-abu saat di-print */
+        @media print {
+            body { background-color: white; }
+            .kertas-a4 { box-shadow: none; margin: 0; padding: 0; width: auto; min-height: auto; }
+            .no-print { display: none !important; }
+        }
+        
+        no-print, .no-print button, .no-print a {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Aksi (Akan hilang saat dicetak berkat class "no-print") -->
+    <div class="text-center mt-4 no-print">
+        <a href="dashboard.html" class="btn btn-secondary me-2">Kembali ke Dashboard</a>
+        <button onclick="window.print()" class="btn btn-success">🖨️ Cetak Dokumen</button>
+    </div>
+
+    <!-- Area Dokumen Resmi -->
+    <div class="kertas-a4">
+        
+        <!-- Kop Surat MAN 1 Payakumbuh -->
+        <div class="kop-surat">
+            <h5>KEMENTERIAN AGAMA REPUBLIK INDONESIA</h5>
+            <h4>KANTOR KEMENTERIAN AGAMA KOTA PAYAKUMBUH</h4>
+            <h4>MADRASAH ALIYAH NEGERI (MAN) 1 PAYAKUMBUH</h4>
+            <p style="margin: 5px 0 0 0; font-size: 14px; font-family: Arial, sans-serif;">
+                Jalan Raya Payakumbuh, Sumatera Barat. Kode Pos: 26225
+            </p>
+        </div>
+
+        <h5 class="text-center text-uppercase fw-bold mb-4 text-decoration-underline">
+            Laporan Riwayat Inventaris Barang
+        </h5>
+
+        <!-- FILTER: hilang otomatis saat dicetak berkat class "no-print" -->
+        <div class="row g-2 mb-4 no-print">
+            <div class="col-md-3">
+                <label class="form-label" style="font-size:13px; font-family: Arial, sans-serif;">Dari Tanggal</label>
+                <input type="date" class="form-control" id="filterDari" onchange="terapkanFilter()">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" style="font-size:13px; font-family: Arial, sans-serif;">Sampai Tanggal</label>
+                <input type="date" class="form-control" id="filterSampai" onchange="terapkanFilter()">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" style="font-size:13px; font-family: Arial, sans-serif;">Jenis</label>
+                <select class="form-select" id="filterJenis" onchange="terapkanFilter()">
+                    <option value="semua">Semua</option>
+                    <option value="Masuk">Masuk</option>
+                    <option value="Keluar">Keluar</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" style="font-size:13px; font-family: Arial, sans-serif;">Kode Barang</label>
+                <input type="text" class="form-control" id="filterKode" placeholder="Contoh: BRG-001" oninput="terapkanFilter()">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button class="btn btn-outline-secondary w-100" onclick="resetFilter()">Reset</button>
+            </div>
+        </div>
+
+        <!-- Tabel Data -->
+        <table class="table table-bordered border-dark mt-3 align-middle">
+            <thead>
+                <tr class="text-center table-light border-dark">
+                    <th>No</th>
+                    <th>Tanggal</th>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Jumlah</th>
+                    <th>Keterangan</th>
+                </tr>
+            </thead>
+            <tbody id="badanLaporan">
+                <tr><td colspan="5" class="text-center text-muted">Sedang mengambil data dari database...</td></tr>
+            </tbody>
+        </table>
+
+        <!-- Area Tanda Tangan -->
+        <div class="tanda-tangan">
+            <p>Payakumbuh, <span id="tanggalCetak">...</span></p>
+            <p>Kepala Tata Usaha,</p>
+            <br><br><br>
+            <p class="fw-bold text-decoration-underline mb-0">.........................................</p>
+            <p>NIP. </p>
+        </div>
+    </div>
+
+    <!-- Logika JavaScript -->
+    <script>
+        // 1. GEMBOK KEAMANAN ADMIN
+        if (sessionStorage.getItem("statusLogin") !== "berhasil" || sessionStorage.getItem("role") !== "admin") {
+            alert("Akses Ditolak! Anda harus login sebagai Admin.");
+            window.location.href = "login.html"; // Pastikan path ini sama dengan file login Anda
+        }
+
+        // 2. Tampilkan Tanggal Hari Ini secara otomatis di bagian tanda tangan
+        const tgl = new Date();
+        document.getElementById('tanggalCetak').innerText = tgl.toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+
+        // 3. AMBIL DATA DARI DATABASE
+        // PENTING: Ganti tulisan di bawah dengan URL Google Apps Script yang SAMA PERSIS dengan yang ada di dashboard.html
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzYx4-xgjxFdWw5LrUKuZSSUTHkfI6LzOaX8Ft6SmTHJOuRUUdcCgrE1z7IYeD0dvQ/exec'; 
+        function formatTanggal(teks) {
+            const d = new Date(teks);
+            if (isNaN(d)) return teks;
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+                let semuaTransaksi = []; // menyimpan semua data mentah dari server
+
+       async function muatLaporan() {
+            try {
+                const response = await fetch(scriptURL);
+                const data = await response.json();
+                semuaTransaksi = data.transaksi;
+
+                kamusNama = {};
+                data.master.forEach(baris => {
+                    kamusNama[String(baris[0])] = baris[1];
+                });
+
+                terapkanFilter();
+            } catch (error) {
+                console.error('Terjadi kesalahan:', error);
+                document.getElementById('badanLaporan').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal terhubung ke database.</td></tr>';
+            }
+        }
+
+        function terapkanFilter() {
+            const dari = document.getElementById('filterDari').value;
+            const sampai = document.getElementById('filterSampai').value;
+            const jenis = document.getElementById('filterJenis').value;
+            const kataKode = document.getElementById('filterKode').value.trim().toLowerCase();
+
+            const hasil = semuaTransaksi.filter(baris => {
+                const tanggal = String(baris[0]).slice(0, 10); // ambil "YYYY-MM-DD" saja
+                const kode = String(baris[1]).toLowerCase();
+                const jenisBaris = baris[3];
+
+                if (dari && tanggal < dari) return false;
+                if (sampai && tanggal > sampai) return false;
+                if (jenis !== 'semua' && jenisBaris !== jenis) return false;
+                if (kataKode && !kode.includes(kataKode)) return false;
+
+                return true;
+            });
+
+            const tabel = document.getElementById('badanLaporan');
+            tabel.innerHTML = '';
+
+            if (hasil.length === 0) {
+                tabel.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Tidak ada transaksi yang cocok dengan filter.</td></tr>';
+                return;
+            }
+
+        let nomor = 1;
+            hasil.forEach(baris => {
+                const kode = baris[1];
+                const nama = kamusNama[kode] || '-';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center">${nomor++}</td>
+                    <td>${formatTanggal(baris[0])}</td>
+                    <td class="fw-bold">${kode}</td>
+                    <td>${nama}</td>
+                    <td class="text-center">${baris[2]}</td>
+                    <td class="text-center">${baris[3]}</td>
+                `;
+                tabel.appendChild(tr);
+            });
+        }
+
+        function resetFilter() {
+            document.getElementById('filterDari').value = '';
+            document.getElementById('filterSampai').value = '';
+            document.getElementById('filterJenis').value = 'semua';
+            document.getElementById('filterKode').value = '';
+            terapkanFilter();
+        }
+
+        muatLaporan();
+    </script>
+</body>
+</html>

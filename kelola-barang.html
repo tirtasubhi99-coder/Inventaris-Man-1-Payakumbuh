@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Master Barang - MAN 1 Payakumbuh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .modal-content {
+            border: none;
+            border-radius: 20px !important;
+            box-shadow: 0px 20px 50px rgba(5, 150, 105, 0.15);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--hijau-50, #ecfdf5);
+            padding: 24px 28px 16px;
+        }
+        .modal-body { padding: 8px 28px 20px; }
+        .modal-footer {
+            border-top: none;
+            padding: 0 28px 24px;
+        }
+        .modal-title { font-weight: 700; color: var(--abu-900, #1e293b); }
+        #badanTabel .btn-sm {
+            border-radius: 8px !important;
+            font-size: 12.5px;
+            padding: 5px 12px;
+        }
+    </style>
+</head>
+<body>
+
+        <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-brand"><span class="ikon">🌿</span> Inventaris TU</div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html">🏠 Dashboard</a>
+            <a href="stok.html">📊 Stok Barang</a>
+            <a href="kelola-barang.html" class="active">📦 Kelola Barang</a>
+            <a href="laporan.html">📑 Laporan</a>
+            <a href="index.html">➕ Input Transaksi</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="btn btn-outline-danger btn-sm w-100" onclick="keluar()">Keluar</button>
+        </div>
+    </div>
+
+    <!-- AREA KONTEN UTAMA -->
+    <div class="main-area">
+        <div class="topbar">
+            <h5>Kelola Barang</h5>
+            <span class="text-muted" style="font-size:14px;">Selamat datang, Admin</span>
+        </div>
+
+        <div class="container py-4">
+        <div class="wadah-tabel">
+            <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
+                <h5 class="fw-bold m-0">Kelola Master Barang</h5>
+                <div class="d-flex gap-2">
+                    <input type="text" class="form-control" id="inputPencarian" placeholder="Cari kode atau nama..." oninput="tampilkan()">
+                    <button class="btn btn-primary text-nowrap" onclick="bukaModalTambah()">+ Tambah Barang</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama Barang</th>
+                            <th class="text-end">Stok Awal</th>
+                            <th class="text-end">Masuk</th>
+                            <th class="text-end">Keluar</th>
+                            <th class="text-end">Stok Saat Ini</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="badanTabel">
+                        <tr><td colspan="7" class="text-center text-muted py-4">Sedang memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <small class="text-muted" id="infoJumlah"></small>
+        </div>
+    </div>
+    </div>
+    <!-- container ditutup di atas -->
+
+    <!-- MODAL TAMBAH / EDIT BARANG -->
+    <div class="modal fade" id="modalBarang" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="judulModal">Tambah Barang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formBarang">
+                    <div class="modal-body">
+                        <input type="hidden" id="inputKodeAsli">
+
+                        <div class="mb-3">
+                            <label class="form-label">Kode Barang</label>
+                            <input type="text" class="form-control" id="inputKode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nama Barang</label>
+                            <input type="text" class="form-control" id="inputNama" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Stok Awal</label>
+                            <input type="number" class="form-control" id="inputStokAwal" min="0" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Total Masuk</label>
+                                <input type="number" class="form-control" id="inputMasuk" min="0" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Total Keluar</label>
+                                <input type="number" class="form-control" id="inputKeluar" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="tombolSimpanBarang">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Gembok: hanya admin yang boleh kelola barang
+        if (sessionStorage.getItem("statusLogin") !== "berhasil" || sessionStorage.getItem("role") !== "admin") {
+            alert("Akses Ditolak! Anda harus login sebagai Admin.");
+            window.location.href = "login.html";
+        }
+
+        function keluar() {
+            Swal.fire({
+                title: 'Keluar dari sistem?',
+                text: 'Anda harus login kembali untuk mengakses halaman ini.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, keluar',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sessionStorage.clear();
+                    window.location.href = "login.html";
+                }
+            });
+        }
+        // PASTIKAN URL INI SAMA PERSIS DENGAN FILE LAIN (index.html, dashboard.html, dll)
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzYx4-xgjxFdWw5LrUKuZSSUTHkfI6LzOaX8Ft6SmTHJOuRUUdcCgrE1z7IYeD0dvQ/exec';
+
+        let semuaBarang = [];
+
+        function esc(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+
+        async function muatData() {
+            const tbody = document.getElementById('badanTabel');
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Sedang memuat data...</td></tr>';
+            try {
+                const res = await fetch(scriptURL);
+                const data = await res.json();
+
+                semuaBarang = data.master.map(b => {
+                    const kode = String(b[0] ?? '');
+                    const nama = String(b[1] ?? '');
+                    const stokAwal = Number(b[2]) || 0;
+                    const masuk = Number(b[3]) || 0;
+                    const keluar = Number(b[4]) || 0;
+                    const stok = stokAwal + masuk - keluar;
+                    return { kode, nama, stokAwal, masuk, keluar, stok };
+                });
+
+                tampilkan();
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Gagal memuat data. Periksa koneksi internet.</td></tr>';
+            }
+        }
+
+        function tampilkan() {
+            const kata = document.getElementById('inputPencarian').value.toLowerCase();
+            const hasil = semuaBarang.filter(b =>
+                b.kode.toLowerCase().includes(kata) || b.nama.toLowerCase().includes(kata)
+            );
+
+            const tbody = document.getElementById('badanTabel');
+            if (hasil.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Tidak ada barang yang cocok.</td></tr>';
+            } else {
+                tbody.innerHTML = hasil.map(b => `
+                    <tr>
+                        <td class="fw-bold text-primary">${esc(b.kode)}</td>
+                        <td>${esc(b.nama)}</td>
+                        <td class="text-end">${b.stokAwal}</td>
+                        <td class="text-end">${b.masuk}</td>
+                        <td class="text-end">${b.keluar}</td>
+                        <td class="text-end fw-bold">${b.stok}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick='bukaModalEdit(${JSON.stringify(b)})'>Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="konfirmasiHapus('${esc(b.kode)}', '${esc(b.nama)}')">Hapus</button>
+                        </td>
+                    </tr>`).join('');
+            }
+            document.getElementById('infoJumlah').innerText = `Menampilkan ${hasil.length} dari ${semuaBarang.length} barang`;
+        }
+
+        const modalBarang = new bootstrap.Modal(document.getElementById('modalBarang'));
+
+        function bukaModalTambah() {
+            document.getElementById('judulModal').innerText = 'Tambah Barang';
+            document.getElementById('inputKodeAsli').value = '';
+            document.getElementById('inputKode').value = '';
+            document.getElementById('inputKode').disabled = false;
+            document.getElementById('inputNama').value = '';
+            document.getElementById('inputStokAwal').value = '';
+            document.getElementById('inputMasuk').value = 0;
+            document.getElementById('inputKeluar').value = 0;
+            modalBarang.show();
+        }
+
+        function bukaModalEdit(barang) {
+            document.getElementById('judulModal').innerText = 'Edit Barang';
+            document.getElementById('inputKodeAsli').value = barang.kode;
+            document.getElementById('inputKode').value = barang.kode;
+            document.getElementById('inputNama').value = barang.nama;
+            document.getElementById('inputStokAwal').value = barang.stokAwal;
+            document.getElementById('inputMasuk').value = barang.masuk;
+            document.getElementById('inputKeluar').value = barang.keluar;
+            modalBarang.show();
+        }
+        function konfirmasiHapus(kode, nama) {
+            Swal.fire({
+                title: 'Hapus barang ini?',
+                html: `<b>${esc(kode)}</b> - ${esc(nama)}<br><span class="text-muted" style="font-size:13px">Riwayat transaksi barang ini tidak akan terhapus, hanya datanya dari daftar master.</span>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (!result.isConfirmed) return;
+
+                try {
+                    const params = new URLSearchParams();
+                    params.append('aksi', 'hapusBarang');
+                    params.append('Kode', kode);
+
+                    const res = await fetch(scriptURL, { method: 'POST', body: params });
+                    const hasil = await res.text();
+
+                    if (hasil.indexOf('Sukses') === -1) {
+                        throw new Error(hasil);
+                    }
+
+                    await Swal.fire({ icon: 'success', title: 'Terhapus', timer: 1200, showConfirmButton: false });
+                    muatData();
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire({ icon: 'error', title: 'Gagal Menghapus', text: error.message || 'Terjadi kesalahan.' });
+                }
+            });
+        }
+
+        document.getElementById('formBarang').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const tombol = document.getElementById('tombolSimpanBarang');
+            tombol.disabled = true;
+            tombol.innerText = 'Menyimpan...';
+
+            const kodeAsli = document.getElementById('inputKodeAsli').value;
+            const aksi = kodeAsli ? 'editBarang' : 'tambahBarang';
+
+            const params = new URLSearchParams();
+            params.append('aksi', aksi);
+            params.append('KodeAsli', kodeAsli);
+            params.append('Kode', document.getElementById('inputKode').value.trim());
+            params.append('Nama', document.getElementById('inputNama').value.trim());
+            params.append('StokAwal', document.getElementById('inputStokAwal').value);
+            params.append('Masuk', document.getElementById('inputMasuk').value);
+            params.append('Keluar', document.getElementById('inputKeluar').value);
+
+            try {
+                const res = await fetch(scriptURL, { method: 'POST', body: params });
+                const hasil = await res.text();
+
+                console.log('Respon dari server:', hasil); // sementara, untuk memeriksa
+
+                if (hasil.indexOf('Sukses') === -1) {
+                    throw new Error(hasil);
+                }
+
+                modalBarang.hide();
+                await Swal.fire({ icon: 'success', title: 'Berhasil', timer: 1500, showConfirmButton: false });
+                muatData();
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Terjadi kesalahan.' });
+            } finally {
+                tombol.disabled = false;
+                tombol.innerText = 'Simpan';
+            }
+        });
+
+        muatData();
+    </script>
+</body>
+</html>
