@@ -25,17 +25,25 @@
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
 
-        /* Desain Kop Surat */
-        .kop-surat { 
-            border-bottom: 3px solid black; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
-            text-align: center; 
+        /* Desain Kop Surat (mengikuti format SPTJM) */
+        .kop-surat {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: Arial, Helvetica, sans-serif;
+            padding-bottom: 8px;
         }
-        .kop-surat h4, .kop-surat h5 { 
-            margin: 0; 
-            font-weight: bold; 
-            text-transform: uppercase;
+        .kop-logo { width: 85px; height: auto; }
+        .kop-teks { flex: 1; text-align: center; line-height: 1.25; }
+        .kop-1 { font-size: 14pt; font-weight: bold; }
+        .kop-2 { font-size: 12pt; font-weight: bold; }
+        .kop-3 { font-size: 11pt; font-weight: bold; }
+        .kop-alamat { font-size: 9pt; }
+        .kop-garis {
+            border-top: 3px solid #000;
+            border-bottom: 1px solid #000;
+            height: 3px;
+            margin-bottom: 25px;
         }
         
         .tanda-tangan { 
@@ -68,13 +76,16 @@
         
         <!-- Kop Surat MAN 1 Payakumbuh -->
         <div class="kop-surat">
-            <h5>KEMENTERIAN AGAMA REPUBLIK INDONESIA</h5>
-            <h4>KANTOR KEMENTERIAN AGAMA KOTA PAYAKUMBUH</h4>
-            <h4>MADRASAH ALIYAH NEGERI (MAN) 1 PAYAKUMBUH</h4>
-            <p style="margin: 5px 0 0 0; font-size: 14px; font-family: Arial, sans-serif;">
-                Jalan Raya Payakumbuh, Sumatera Barat. Kode Pos: 26225
-            </p>
+            <img src="logo-kemenag.png" alt="Logo Kemenag" class="kop-logo">
+            <div class="kop-teks">
+                <div class="kop-1">KEMENTERIAN AGAMA REPUBLIK INDONESIA</div>
+                <div class="kop-2">KANTOR KEMENTERIAN AGAMA KOTA PAYAKUMBUH</div>
+                <div class="kop-3">MADRASAH ALIYAH NEGERI 1 KOTA PAYAKUMBUH</div>
+                <div class="kop-alamat">Jalan H. Rasyid Thaher Nomor 56 Parambahan Kota Payakumbuh</div>
+                <div class="kop-alamat">Kode Pos 26219 Telepon 0752 93431 Email: man1pyk@gmail.com</div>
+            </div>
         </div>
+        <div class="kop-garis"></div>
 
         <h5 class="text-center text-uppercase fw-bold mb-4 text-decoration-underline">
             Laporan Riwayat Inventaris Barang
@@ -129,8 +140,8 @@
             <p>Payakumbuh, <span id="tanggalCetak">...</span></p>
             <p>Kepala Tata Usaha,</p>
             <br><br><br>
-            <p class="fw-bold text-decoration-underline mb-0">.........................................</p>
-            <p>NIP. </p>
+            <p class="fw-bold text-decoration-underline mb-0">Taslipulnur, S.Sos.I</p>
+            <p>NIP. 198105152005012005</p>
         </div>
     </div>
 
